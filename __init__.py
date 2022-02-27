@@ -26,10 +26,29 @@ class Database():
         self.cursor.execute(query)
         return self.fetchall()
 
+    def close(self):
+        self.connection.commit()
+        self.connection.close()
+
 
 def configure_db():
-    connection = Database.connection
-    cursor = Database.cursor
+    db = Database()
+    schema_query = "CREATE SCHEMA IF NOT EXISTS frinx;"
+    table_query = """CREATE TABLE IF NOT EXISTS frinx.interfaces (
+        id SERIAL PRIMARY KEY,
+        connection INTEGER,
+        name VARCHAR(255) NOT NULL,
+        description VARCHAR(255),
+        config json,
+        type VARCHAR(50),
+        infra_type VARCHAR(50),
+        port_channel_id INTEGER,
+        max_frame_size INTEGER
+        );"""
+
+    db.execute(schema_query)
+    db.execute(table_query)
+    db.close()
 
 
 def read_data():
@@ -45,5 +64,5 @@ def parse_data():
 
 if __name__ == '__main__':
     configure_db()
-    network_data = read_data()
-    parse_data(network_data)
+    # network_data = read_data()
+    # parse_data(network_data)
