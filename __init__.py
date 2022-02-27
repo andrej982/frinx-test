@@ -26,43 +26,47 @@ class Database():
         self.cursor.execute(query)
         return self.fetchall()
 
-    def close(self):
+    def commit(self):
         self.connection.commit()
+
+    # utility methods for usage with context manager
+    def __enter__(self):
+        return self
+    
+    def __exit__(self):
         self.connection.close()
 
 
 def configure_db():
-    db = Database()
-    schema_query = "CREATE SCHEMA IF NOT EXISTS frinx;"
-    table_query = """CREATE TABLE IF NOT EXISTS frinx.interfaces (
-        id SERIAL PRIMARY KEY,
-        connection INTEGER,
-        name VARCHAR(255) NOT NULL,
-        description VARCHAR(255),
-        config json,
-        type VARCHAR(50),
-        infra_type VARCHAR(50),
-        port_channel_id INTEGER,
-        max_frame_size INTEGER
-        );"""
+    with Database as db:
+        schema_query = "CREATE SCHEMA IF NOT EXISTS frinx;"
+        table_query = """CREATE TABLE IF NOT EXISTS frinx.interfaces (
+            id SERIAL PRIMARY KEY,
+            connection INTEGER,
+            name VARCHAR(255) NOT NULL,
+            description VARCHAR(255),
+            config json,
+            type VARCHAR(50),
+            infra_type VARCHAR(50),
+            port_channel_id INTEGER,
+            max_frame_size INTEGER
+            );"""
 
-    db.execute(schema_query)
-    db.execute(table_query)
-    db.close()
+        db.execute(schema_query)
+        db.execute(table_query)
+        db.commit()
 
 
-def read_data():
+def _read_data():
     with open('configClear_v2.json', 'r') as file:
-        data = json.load(file)
-        pass
-        return data
+        return json.load(file)
 
 
 def parse_data():
+    data = _read_data()
     pass
 
 
 if __name__ == '__main__':
     configure_db()
-    # network_data = read_data()
-    # parse_data(network_data)
+    parse_data()
