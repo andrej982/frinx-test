@@ -1,4 +1,3 @@
-from plistlib import FMT_BINARY
 import psycopg2
 import json
 
